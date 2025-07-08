@@ -65,12 +65,19 @@ const CategoryItem = (category /* html */) =>
                 </button>
 `;
 
-export const HomePage = ({ products = [], loading = false, total = 0, categories, params = {} }) => {
+export const HomePage = ({
+  products = [],
+  loading = false,
+  loadingMore = false,
+  total = 0,
+  categories,
+  params = {},
+}) => {
   const categoryList = Object.keys(categories);
 
   const currentLimit = params.limit || 20;
   const currentSort = params.sort || "price_asc";
-  const currentQuery = params.query || "";
+  const currentQuery = decodeURIComponent(params.query) || "";
 
   return /* html */ `
     <div class="min-h-screen bg-gray-50">
@@ -100,7 +107,7 @@ export const HomePage = ({ products = [], loading = false, total = 0, categories
             <div class="relative">
               <input type="text" id="search-input" placeholder="상품명을 검색해보세요..." value="${currentQuery}" class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg
                           focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center search-icon" style="cursor: pointer;">
                 <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
@@ -177,6 +184,10 @@ export const HomePage = ({ products = [], loading = false, total = 0, categories
               ${loading ? LoadingUIList : products.map(ProductItem).join("")}
             </div>
             
+            <!-- 더 보기 로딩 상태 -->
+            ${
+              loadingMore
+                ? /* html */ `
             <div class="text-center py-4">
               <div class="inline-flex items-center">
                 <svg class="animate-spin h-5 w-5 text-blue-600 mr-2" fill="none" viewBox="0 0 24 24">
@@ -187,6 +198,11 @@ export const HomePage = ({ products = [], loading = false, total = 0, categories
                 <span class="text-sm text-gray-600">상품을 불러오는 중...</span>
               </div>
             </div>
+            `
+                : ""
+            }
+            
+          
           </div>
         </div>
       </main>

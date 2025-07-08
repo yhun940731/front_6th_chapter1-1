@@ -18,16 +18,21 @@ const enableMocking = () =>
  * @property {boolean} loading - 로딩 상태
  * @property {Object} categories - 카테고리 목록
  * @property {Object} params - URL 파라미터 상태
+ * @property {Object} pagination - 페이지네이션 상태
  */
 let state = {
   products: [],
   total: 0,
   loading: false,
+  loadingMore: false, // 추가 로딩 상태
   categories: {},
   params: {}, // URL 파라미터 상태 추가
+  pagination: {
+    page: 1,
+    limit: 20,
+    hasNext: true,
+  },
 };
-
-let searchInputTimeoutId; // 검색 디바운스용 타이머
 
 // URL 업데이트 함수 (새로고침 없이)
 const updateURL = (newParams) => {
@@ -57,68 +62,16 @@ const syncFormWithURL = () => {
   // search input 값 설정
   const searchInput = document.getElementById("search-input");
   if (searchInput) {
-    searchInput.value = params.query;
+    searchInput.value = decodeURIComponent(params.query);
   }
 };
 
-const render = () => {
-  // 기존 이벤트 리스너 제거
-  removeEventListeners();
+// 다음 페이지 로드 함수
+const loadMoreProducts = async () => {
+  if (state.loadingMore || !state.pagination.hasNext) return;
 
-  document.body.querySelector("#root").innerHTML = HomePage({
-    ...state,
-    params: state.params || getURLParams(),
-  });
-
-  // URL 파라미터 기반으로 폼 값 설정
-  syncFormWithURL();
-
-  // 새로운 이벤트 리스너 추가
-  addEventListeners();
-};
-
-const updateLimit = async (limit = 20) => {
-  // state.loading = true;
-  // render();
-
-  try {
-    const {
-      products,
-      pagination: { total },
-    } = await getProducts({ limit });
-
-    state.products = products;
-    state.total = total;
-    // state.loading = false;
-
-    render();
-  } catch (error) {
-    console.error("상품 로딩 실패:", error);
-    // state.loading = false;
-    render();
-  }
-};
-
-const updateProducts = async (params = {}) => {
-  state.loading = true;
-  render();
-
-  try {
-    const {
-      products,
-      pagination: { total },
-    } = await getProducts(params);
-
-    state.products = products;
-    state.total = total;
-    state.loading = false;
-
-    render();
-  } catch (error) {
-    console.error("상품 로딩 실패:", error);
-    state.loading = false;
-    render();
-  }
+  const params = getURLParams();
+  await updateProducts(params, true); // append = true
 };
 
 const handleChangeLimitSelect = async (e) => {
@@ -133,13 +86,38 @@ const handleChangeCategory1Select = async (e) => {
   await updateProducts({ sort });
 };
 
-const handleSearchInput = (e) => {
-  clearTimeout(searchInputTimeoutId);
-  searchInputTimeoutId = setTimeout(async () => {
-    const query = e.target.value.trim();
-    updateURL({ query });
+const handleSearchSubmit = async () => {
+  const searchInput = document.getElementById("search-input");
+
+  if (searchInput) {
+    const query = searchInput.value.trim();
+
+    updateURL({ query: encodeURIComponent(query) });
+
     await updateProducts({ query });
-  }, 500); // 500ms 디바운스
+  }
+};
+
+const handleSearchKeyDown = (e) => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    handleSearchSubmit();
+  }
+};
+
+// 무한 스크롤 감지 함수
+const setupInfiniteScroll = () => {
+  const handleScroll = () => {
+    // 스크롤이 바닥에서 200px 이내에 도달했을 때
+    if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 200) {
+      loadMoreProducts();
+    }
+  };
+
+  // 기존 이벤트 리스너 제거
+  window.removeEventListener("scroll", handleScroll);
+  // 새 이벤트 리스너 추가
+  window.addEventListener("scroll", handleScroll);
 };
 
 const addEventListeners = () => {
@@ -158,7 +136,13 @@ const addEventListeners = () => {
   // 검색 이벤트
   const searchInput = document.getElementById("search-input");
   if (searchInput) {
-    searchInput.addEventListener("input", handleSearchInput);
+    searchInput.addEventListener("keydown", handleSearchKeyDown);
+  }
+
+  // 검색 아이콘 클릭 이벤트
+  const searchIcon = document.querySelector(".search-icon");
+  if (searchIcon) {
+    searchIcon.addEventListener("click", handleSearchSubmit);
   }
 };
 
@@ -178,7 +162,102 @@ const removeEventListeners = () => {
   // 검색 이벤트 제거
   const searchInput = document.getElementById("search-input");
   if (searchInput) {
-    searchInput.removeEventListener("input", handleSearchInput);
+    searchInput.removeEventListener("keydown", handleSearchKeyDown);
+  }
+
+  // 검색 아이콘 클릭 이벤트 제거
+  const searchIcon = document.querySelector(".search-icon");
+  if (searchIcon) {
+    searchIcon.removeEventListener("click", handleSearchSubmit);
+  }
+};
+
+const render = () => {
+  // 기존 이벤트 리스너 제거
+  removeEventListeners();
+
+  document.body.querySelector("#root").innerHTML = HomePage({
+    ...state,
+    params: state.params || getURLParams(),
+  });
+
+  // URL 파라미터 기반으로 폼 값 설정
+  syncFormWithURL();
+
+  // 새로운 이벤트 리스너 추가
+  addEventListeners();
+
+  // 무한 스크롤 설정
+  setupInfiniteScroll();
+};
+
+const updateLimit = async (limit = 20) => {
+  state.pagination.limit = limit;
+
+  try {
+    const params = getURLParams();
+    const {
+      products,
+      pagination: { hasNext, total, page },
+    } = await getProducts({ ...params, limit, page: 1 });
+
+    state.products = products;
+    state.total = total;
+    state.pagination.hasNext = hasNext;
+    state.pagination.page = page;
+
+    render();
+  } catch (error) {
+    console.error("상품 로딩 실패:", error);
+    render();
+  }
+};
+
+const updateProducts = async (params = {}, append = false) => {
+  if (append) {
+    state.loadingMore = true;
+  } else {
+    state.loading = true;
+    state.pagination.page = 1; // 새로운 검색/필터시 페이지 리셋
+  }
+
+  render();
+
+  try {
+    const requestParams = {
+      ...params,
+      page: append ? state.pagination.page + 1 : 1,
+      limit: state.pagination.limit,
+      search: params.query || state.params.query || "",
+    };
+
+    const {
+      products,
+      pagination: { total, page, limit },
+    } = await getProducts(requestParams);
+
+    if (append) {
+      // 기존 상품에 추가
+      state.products = [...state.products, ...products];
+      state.pagination.page = page;
+    } else {
+      // 새로운 상품으로 대체
+      state.products = products;
+      state.pagination.page = page;
+    }
+
+    state.total = total;
+    state.pagination.limit = limit;
+    state.pagination.hasNext = state.products.length < total;
+    state.loading = false;
+    state.loadingMore = false;
+
+    render();
+  } catch (error) {
+    console.error("상품 로딩 실패:", error);
+    state.loading = false;
+    state.loadingMore = false;
+    render();
   }
 };
 
@@ -187,19 +266,26 @@ const main = async () => {
   const urlParams = getURLParams();
   state.params = urlParams;
 
+  // 페이지네이션 초기화
+  state.pagination.limit = parseInt(urlParams.limit) || 20;
+  state.pagination.page = 1;
+
   state.loading = true;
   render();
 
   const [
     {
       products,
-      pagination: { total },
+      pagination: { total, page, limit },
     },
     categories,
-  ] = await Promise.all([getProducts(urlParams), getCategories({})]);
+  ] = await Promise.all([getProducts({ ...urlParams, page: 1, limit: state.pagination.limit }), getCategories({})]);
 
   state.products = products;
   state.total = total;
+  state.pagination.page = page;
+  state.pagination.limit = limit;
+  state.pagination.hasNext = products.length < total;
   state.loading = false;
   state.categories = categories;
 
