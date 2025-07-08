@@ -61,7 +61,7 @@ const CategoryItem = (category /* html */) =>
   `
                 <button data-category1="${category}" class="category1-filter-btn text-left px-3 py-2 text-sm rounded-md border transition-colors
                    bg-white border-gray-300 text-gray-700 hover:bg-gray-50">
-                  생활/건강
+                  ${category}
                 </button>
 `;
 
@@ -77,7 +77,7 @@ export const HomePage = ({
 
   const currentLimit = params.limit || 20;
   const currentSort = params.sort || "price_asc";
-  const currentQuery = decodeURIComponent(params.query) || "";
+  const currentSearch = params.search || "";
 
   return /* html */ `
     <div class="min-h-screen bg-gray-50">
@@ -105,9 +105,9 @@ export const HomePage = ({
           <!-- 검색창 -->
           <div class="mb-4">
             <div class="relative">
-              <input type="text" id="search-input" placeholder="상품명을 검색해보세요..." value="${currentQuery}" class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg
+              <input type="text" id="search-input" placeholder="상품명을 검색해보세요..." value="${currentSearch}" class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg
                           focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-              <div class="absolute inset-y-0 left-0 pl-3 flex items-center search-icon" style="cursor: pointer;">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center" style="cursor: pointer;">
                 <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
@@ -182,6 +182,7 @@ export const HomePage = ({
             <div class="grid grid-cols-2 gap-4 mb-6" id="products-grid">
               <!-- 로딩 스켈레톤 -->
               ${loading ? LoadingUIList : products.map(ProductItem).join("")}
+              ${loadingMore ? LoadingUIList : ""}
             </div>
             
             <!-- 더 보기 로딩 상태 -->

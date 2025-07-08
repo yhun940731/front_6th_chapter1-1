@@ -1,8 +1,7 @@
 import { HomePage } from "./pages/HomePage.js";
-
 import { getCategories, getProducts } from "./api/productApi.js";
-
 import { getURLParams, mergeURLParams } from "./utils/url.js";
+import { store } from "./store/index.js";
 
 const enableMocking = () =>
   import("./mocks/browser.js").then(({ worker }) =>
@@ -11,29 +10,6 @@ const enableMocking = () =>
     }),
   );
 
-/**
- * * @typedef {Object} State
- * @property {Array} products - 상품 목록
- * @property {number} total - 전체 상품 수
- * @property {boolean} loading - 로딩 상태
- * @property {Object} categories - 카테고리 목록
- * @property {Object} params - URL 파라미터 상태
- * @property {Object} pagination - 페이지네이션 상태
- */
-let state = {
-  products: [],
-  total: 0,
-  loading: false,
-  loadingMore: false, // 추가 로딩 상태
-  categories: {},
-  params: {}, // URL 파라미터 상태 추가
-  pagination: {
-    page: 1,
-    limit: 20,
-    hasNext: true,
-  },
-};
-
 // URL 업데이트 함수 (새로고침 없이)
 const updateURL = (newParams) => {
   const params = mergeURLParams(newParams);
@@ -41,7 +17,7 @@ const updateURL = (newParams) => {
   const newURL = `${window.location.pathname}${params.toString() ? "?" + params.toString() : ""}`;
   window.history.pushState({}, "", newURL);
 
-  state.params = Object.fromEntries(params.entries());
+  store.setParams(Object.fromEntries(params.entries()));
 };
 
 const syncFormWithURL = () => {
@@ -62,12 +38,13 @@ const syncFormWithURL = () => {
   // search input 값 설정
   const searchInput = document.getElementById("search-input");
   if (searchInput) {
-    searchInput.value = decodeURIComponent(params.query);
+    searchInput.value = params.search;
   }
 };
 
 // 다음 페이지 로드 함수
 const loadMoreProducts = async () => {
+  const state = store.getState();
   if (state.loadingMore || !state.pagination.hasNext) return;
 
   const params = getURLParams();
@@ -90,11 +67,11 @@ const handleSearchSubmit = async () => {
   const searchInput = document.getElementById("search-input");
 
   if (searchInput) {
-    const query = searchInput.value.trim();
+    const search = searchInput.value.trim();
 
-    updateURL({ query: encodeURIComponent(query) });
+    updateURL({ search: encodeURIComponent(search) });
 
-    await updateProducts({ query });
+    await updateProducts({ search });
   }
 };
 
@@ -120,6 +97,14 @@ const setupInfiniteScroll = () => {
   window.addEventListener("scroll", handleScroll);
 };
 
+// 브라우저 뒤로가기/앞으로가기 지원
+window.addEventListener("popstate", async () => {
+  const urlParams = getURLParams();
+  store.setParams(urlParams);
+
+  await updateProducts(urlParams);
+});
+
 const addEventListeners = () => {
   // 개수 선택 이벤트
   const limitSelect = document.getElementById("limit-select");
@@ -137,12 +122,6 @@ const addEventListeners = () => {
   const searchInput = document.getElementById("search-input");
   if (searchInput) {
     searchInput.addEventListener("keydown", handleSearchKeyDown);
-  }
-
-  // 검색 아이콘 클릭 이벤트
-  const searchIcon = document.querySelector(".search-icon");
-  if (searchIcon) {
-    searchIcon.addEventListener("click", handleSearchSubmit);
   }
 };
 
@@ -164,17 +143,13 @@ const removeEventListeners = () => {
   if (searchInput) {
     searchInput.removeEventListener("keydown", handleSearchKeyDown);
   }
-
-  // 검색 아이콘 클릭 이벤트 제거
-  const searchIcon = document.querySelector(".search-icon");
-  if (searchIcon) {
-    searchIcon.removeEventListener("click", handleSearchSubmit);
-  }
 };
 
 const render = () => {
   // 기존 이벤트 리스너 제거
   removeEventListeners();
+
+  const state = store.getState();
 
   document.body.querySelector("#root").innerHTML = HomePage({
     ...state,
@@ -192,19 +167,21 @@ const render = () => {
 };
 
 const updateLimit = async (limit = 20) => {
-  state.pagination.limit = limit;
+  store.setPagination({
+    limit,
+  });
 
   try {
     const params = getURLParams();
+
     const {
       products,
       pagination: { hasNext, total, page },
     } = await getProducts({ ...params, limit, page: 1 });
 
-    state.products = products;
-    state.total = total;
-    state.pagination.hasNext = hasNext;
-    state.pagination.page = page;
+    store.setProducts(products);
+    store.setTotal(total);
+    store.setPagination({ hasNext, page });
 
     render();
   } catch (error) {
@@ -215,48 +192,49 @@ const updateLimit = async (limit = 20) => {
 
 const updateProducts = async (params = {}, append = false) => {
   if (append) {
-    state.loadingMore = true;
+    store.setLoadingMore(true);
   } else {
-    state.loading = true;
-    state.pagination.page = 1; // 새로운 검색/필터시 페이지 리셋
+    store.setLoading(true);
+    store.resetPagination(); // 새로운 검색/필터시 페이지 리셋
   }
 
   render();
 
   try {
+    const state = store.getState();
+
     const requestParams = {
       ...params,
       page: append ? state.pagination.page + 1 : 1,
       limit: state.pagination.limit,
-      search: params.query || state.params.query || "",
+      search: params.search || state.params.search || "",
     };
 
     const {
       products,
-      pagination: { total, page, limit },
+      pagination: { hasNext, total, page, limit },
     } = await getProducts(requestParams);
 
     if (append) {
       // 기존 상품에 추가
-      state.products = [...state.products, ...products];
-      state.pagination.page = page;
+      store.appendProducts(products);
+      store.setPagination({ page });
     } else {
       // 새로운 상품으로 대체
-      state.products = products;
-      state.pagination.page = page;
+      store.setProducts(products);
+      store.setPagination({ page });
     }
 
-    state.total = total;
-    state.pagination.limit = limit;
-    state.pagination.hasNext = state.products.length < total;
-    state.loading = false;
-    state.loadingMore = false;
+    store.setTotal(total);
+    store.setPagination({ limit, hasNext });
+    store.setLoading(false);
+    store.setLoadingMore(false);
 
     render();
   } catch (error) {
     console.error("상품 로딩 실패:", error);
-    state.loading = false;
-    state.loadingMore = false;
+    store.setLoading(false);
+    store.setLoadingMore(false);
     render();
   }
 };
@@ -264,42 +242,40 @@ const updateProducts = async (params = {}, append = false) => {
 const main = async () => {
   // URL 파라미터 읽기
   const urlParams = getURLParams();
-  state.params = urlParams;
+  store.setParams(urlParams);
 
   // 페이지네이션 초기화
-  state.pagination.limit = parseInt(urlParams.limit) || 20;
-  state.pagination.page = 1;
+  store.setPagination({
+    limit: parseInt(urlParams.limit) || 20,
+    page: 1,
+  });
 
-  state.loading = true;
+  store.setLoading(true);
   render();
 
   const [
     {
       products,
-      pagination: { total, page, limit },
+      pagination: { hasNext, total, page, limit },
     },
     categories,
-  ] = await Promise.all([getProducts({ ...urlParams, page: 1, limit: state.pagination.limit }), getCategories({})]);
+  ] = await Promise.all([
+    getProducts({
+      ...urlParams,
+      page: 1,
+      limit: store.getPagination().limit,
+    }),
+    getCategories({}),
+  ]);
 
-  state.products = products;
-  state.total = total;
-  state.pagination.page = page;
-  state.pagination.limit = limit;
-  state.pagination.hasNext = products.length < total;
-  state.loading = false;
-  state.categories = categories;
+  store.setProducts(products);
+  store.setTotal(total);
+  store.setPagination({ page, limit, hasNext });
+  store.setCategories(categories);
+  store.setLoading(false);
 
   render();
 };
-
-// 브라우저 뒤로가기/앞으로가기 지원
-window.addEventListener("popstate", async () => {
-  const urlParams = getURLParams();
-
-  state.params = urlParams;
-
-  await updateProducts(urlParams);
-});
 
 // 애플리케이션 시작
 if (import.meta.env.MODE !== "test") {

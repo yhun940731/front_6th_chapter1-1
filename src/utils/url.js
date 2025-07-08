@@ -5,7 +5,7 @@ const getURLParams = () => {
   return {
     limit: params.get("limit") ? parseInt(params.get("limit")) : 20,
     sort: params.get("sort") || "price_asc",
-    query: params.get("query") || "",
+    search: decodeURIComponent(params.get("search") || ""),
     category1: params.get("category1") || "",
   };
 };
