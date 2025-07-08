@@ -57,7 +57,8 @@ const ProductItem = ({
               </div>
 `;
 
-const CategoryItem = (category) => /* html */ `
+const CategoryItem = (category /* html */) =>
+  `
                 <button data-category1="${category}" class="category1-filter-btn text-left px-3 py-2 text-sm rounded-md border transition-colors
                    bg-white border-gray-300 text-gray-700 hover:bg-gray-50">
                   생활/건강
@@ -66,6 +67,7 @@ const CategoryItem = (category) => /* html */ `
 
 export const HomePage = ({ products = [], loading = false, total = 0, categories, params = {} }) => {
   const categoryList = Object.keys(categories);
+
   const currentLimit = params.limit || 20;
   const currentSort = params.sort || "price_asc";
   const currentQuery = params.query || "";

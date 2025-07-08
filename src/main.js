@@ -2,6 +2,8 @@ import { HomePage } from "./pages/HomePage.js";
 
 import { getCategories, getProducts } from "./api/productApi.js";
 
+import { getURLParams, mergeURLParams } from "./utils/url.js";
+
 const enableMocking = () =>
   import("./mocks/browser.js").then(({ worker }) =>
     worker.start({
@@ -9,6 +11,14 @@ const enableMocking = () =>
     }),
   );
 
+/**
+ * * @typedef {Object} State
+ * @property {Array} products - 상품 목록
+ * @property {number} total - 전체 상품 수
+ * @property {boolean} loading - 로딩 상태
+ * @property {Object} categories - 카테고리 목록
+ * @property {Object} params - URL 파라미터 상태
+ */
 let state = {
   products: [],
   total: 0,
@@ -19,54 +29,14 @@ let state = {
 
 let searchInputTimeoutId; // 검색 디바운스용 타이머
 
-// URL 쿼리스트링 파싱 함수
-const getURLParams = () => {
-  const params = new URLSearchParams(window.location.search);
-  return {
-    limit: params.get("limit") ? parseInt(params.get("limit")) : 20,
-    sort: params.get("sort") || "price_asc",
-    query: params.get("query") || "",
-    category1: params.get("category1") || "",
-  };
-};
-
 // URL 업데이트 함수 (새로고침 없이)
 const updateURL = (newParams) => {
-  const currentParams = getURLParams();
-  const mergedParams = { ...currentParams, ...newParams };
+  const params = mergeURLParams(newParams);
 
-  // 빈 값 제거
-  Object.keys(mergedParams).forEach((key) => {
-    if (!mergedParams[key] || mergedParams[key] === "") {
-      delete mergedParams[key];
-    }
-  });
-
-  const urlParams = new URLSearchParams();
-  Object.entries(mergedParams).forEach(([key, value]) => {
-    if (value) urlParams.set(key, value);
-  });
-
-  const newURL = `${window.location.pathname}${urlParams.toString() ? "?" + urlParams.toString() : ""}`;
+  const newURL = `${window.location.pathname}${params.toString() ? "?" + params.toString() : ""}`;
   window.history.pushState({}, "", newURL);
 
-  state.params = mergedParams;
-};
-
-const render = () => {
-  // 기존 이벤트 리스너 제거
-  removeEventListeners();
-
-  document.body.querySelector("#root").innerHTML = HomePage({
-    ...state,
-    params: state.params || getURLParams(),
-  });
-
-  // URL 파라미터 기반으로 폼 값 설정
-  syncFormWithURL();
-
-  // 새로운 이벤트 리스너 추가
-  addEventListeners();
+  state.params = Object.fromEntries(params.entries());
 };
 
 const syncFormWithURL = () => {
@@ -91,10 +61,70 @@ const syncFormWithURL = () => {
   }
 };
 
+const render = () => {
+  // 기존 이벤트 리스너 제거
+  removeEventListeners();
+
+  document.body.querySelector("#root").innerHTML = HomePage({
+    ...state,
+    params: state.params || getURLParams(),
+  });
+
+  // URL 파라미터 기반으로 폼 값 설정
+  syncFormWithURL();
+
+  // 새로운 이벤트 리스너 추가
+  addEventListeners();
+};
+
+const updateLimit = async (limit = 20) => {
+  // state.loading = true;
+  // render();
+
+  try {
+    const {
+      products,
+      pagination: { total },
+    } = await getProducts({ limit });
+
+    state.products = products;
+    state.total = total;
+    // state.loading = false;
+
+    render();
+  } catch (error) {
+    console.error("상품 로딩 실패:", error);
+    // state.loading = false;
+    render();
+  }
+};
+
+const updateProducts = async (params = {}) => {
+  state.loading = true;
+  render();
+
+  try {
+    const {
+      products,
+      pagination: { total },
+    } = await getProducts(params);
+
+    state.products = products;
+    state.total = total;
+    state.loading = false;
+
+    render();
+  } catch (error) {
+    console.error("상품 로딩 실패:", error);
+    state.loading = false;
+    render();
+  }
+};
+
 const handleChangeLimitSelect = async (e) => {
   const limit = parseInt(e.target.value);
   updateURL({ limit });
-  await updateProducts({ limit });
+  await updateLimit(limit);
 };
 
 const handleChangeCategory1Select = async (e) => {
@@ -152,28 +182,6 @@ const removeEventListeners = () => {
   }
 };
 
-const updateProducts = async (params = {}) => {
-  state.loading = true;
-  render();
-
-  try {
-    const {
-      products,
-      pagination: { total },
-    } = await getProducts(params);
-
-    state.products = products;
-    state.total = total;
-    state.loading = false;
-
-    render();
-  } catch (error) {
-    console.error("상품 로딩 실패:", error);
-    state.loading = false;
-    render();
-  }
-};
-
 const main = async () => {
   // URL 파라미터 읽기
   const urlParams = getURLParams();
@@ -201,7 +209,9 @@ const main = async () => {
 // 브라우저 뒤로가기/앞으로가기 지원
 window.addEventListener("popstate", async () => {
   const urlParams = getURLParams();
+
   state.params = urlParams;
+
   await updateProducts(urlParams);
 });
 
