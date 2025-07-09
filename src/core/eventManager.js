@@ -1,6 +1,12 @@
 import { handleChangeLimitSelect, handleChangeCategory1Select } from "../handlers/filterHandlers.js";
 import { handleSearchKeyDown } from "../handlers/searchHandlers.js";
-import { handleAddToCart } from "../handlers/cartHandlers.js";
+import {
+  handleAddToCart,
+  handleCartQuantityChange,
+  handleQuantityIncrease,
+  handleQuantityDecrease,
+  handleRemoveFromCart,
+} from "../handlers/cartHandlers.js";
 import { handleCategoryFilterClick, handleBreadcrumbClick } from "../handlers/categoryHandlers.js";
 
 export const setupEventListeners = () => {
@@ -30,6 +36,17 @@ export const setupEventListeners = () => {
   if (breadcrumbList) {
     breadcrumbList.addEventListener("click", handleBreadcrumbClick);
   }
+
+  // 장바구니 다이얼로그 이벤트들
+  const cartDialog = document.getElementById("cart-dialog");
+  if (cartDialog) {
+    cartDialog.addEventListener("change", handleCartQuantityChange);
+    cartDialog.addEventListener("click", (e) => {
+      handleQuantityIncrease(e);
+      handleQuantityDecrease(e);
+      handleRemoveFromCart(e);
+    });
+  }
 };
 
 export const removeEventListeners = () => {
@@ -56,5 +73,12 @@ export const removeEventListeners = () => {
   const breadcrumbList = document.getElementById("breadcrumb-list");
   if (breadcrumbList) {
     breadcrumbList.removeEventListener("click", handleBreadcrumbClick);
+  }
+
+  // 장바구니 다이얼로그 이벤트 제거
+  const cartDialog = document.getElementById("cart-dialog");
+  if (cartDialog) {
+    cartDialog.removeEventListener("change", handleCartQuantityChange);
+    // click 이벤트는 익명 함수로 등록했으므로 제거할 수 없음 (DOM이 재생성되므로 문제없음)
   }
 };

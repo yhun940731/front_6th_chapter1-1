@@ -1,5 +1,5 @@
 // eslint-disable-next-line no-unused-vars
-const 상품목록_레이아웃_로딩 = /* html */ `
+const 상품목록_레이아웃_로딩 = /*html*/ `
     <div class="min-h-screen bg-gray-50">
       <header class="bg-white shadow-sm sticky top-0 z-40">
         <div class="max-w-md mx-auto px-4 py-4">
@@ -150,7 +150,7 @@ const 상품목록_레이아웃_로딩 = /* html */ `
   `;
 
 // eslint-disable-next-line no-unused-vars
-const 상품목록_레이아웃_로딩완료 = /* html */ `
+const 상품목록_레이아웃_로딩완료 = /*html*/ `
     <div class="bg-gray-50">
       <header class="bg-white shadow-sm sticky top-0 z-40">
         <div class="max-w-md mx-auto px-4 py-4">
@@ -324,7 +324,7 @@ const 상품목록_레이아웃_로딩완료 = /* html */ `
   `;
 
 // eslint-disable-next-line no-unused-vars
-const 상품목록_레이아웃_카테고리_1Depth = /* html */ `
+const 상품목록_레이아웃_카테고리_1Depth = /*html*/ `
     <main class="max-w-md mx-auto px-4 py-4">
       <!-- 검색 및 필터 -->
       <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-4">
@@ -405,7 +405,7 @@ const 상품목록_레이아웃_카테고리_1Depth = /* html */ `
   `;
 
 // eslint-disable-next-line no-unused-vars
-const 상품목록_레이아웃_카테고리_2Depth = /* html */ `
+const 상품목록_레이아웃_카테고리_2Depth = /*html*/ `
     <main class="max-w-md mx-auto px-4 py-4">
       <!-- 검색 및 필터 -->
       <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-4">
@@ -486,7 +486,7 @@ const 상품목록_레이아웃_카테고리_2Depth = /* html */ `
   `;
 
 // eslint-disable-next-line no-unused-vars
-const 토스트 = /* html */ `
+const 토스트 = /*html*/ `
     <div class="flex flex-col gap-2 items-center justify-center mx-auto" style="width: fit-content;">
       <div class="bg-green-600 text-white px-4 py-3 rounded-lg shadow-lg flex items-center space-x-2 max-w-sm">
         <div class="flex-shrink-0">
@@ -533,7 +533,7 @@ const 토스트 = /* html */ `
   `;
 
 // eslint-disable-next-line no-unused-vars
-const 장바구니_비어있음 = /* html */ `
+const 장바구니_비어있음 = /*html*/ `
     <div class="flex min-h-full items-end justify-center p-0 sm:items-center sm:p-4">
       <div class="relative bg-white rounded-t-lg sm:rounded-lg shadow-xl w-full max-w-md sm:max-w-lg max-h-[90vh] overflow-hidden">
         <!-- 헤더 -->
@@ -572,7 +572,7 @@ const 장바구니_비어있음 = /* html */ `
   `;
 
 // eslint-disable-next-line no-unused-vars
-const 장바구니_선택없음 = /* html */ `
+const 장바구니_선택없음 = /*html*/ `
     <div class="flex min-h-full items-end justify-center p-0 sm:items-center sm:p-4">
       <div class="relative bg-white rounded-t-lg sm:rounded-lg shadow-xl w-full max-w-md sm:max-w-lg max-h-[90vh] overflow-hidden">
         <!-- 헤더 -->
@@ -724,7 +724,7 @@ const 장바구니_선택없음 = /* html */ `
   `;
 
 // eslint-disable-next-line no-unused-vars
-const 장바구니_선택있음 = /* html */ `
+const 장바구니_선택있음 = /*html*/ `
     <div class="flex min-h-full items-end justify-center p-0 sm:items-center sm:p-4">
       <div class="relative bg-white rounded-t-lg sm:rounded-lg shadow-xl w-full max-w-md sm:max-w-lg max-h-[90vh] overflow-hidden">
         <!-- 헤더 -->
@@ -884,7 +884,7 @@ const 장바구니_선택있음 = /* html */ `
   `;
 
 // eslint-disable-next-line no-unused-vars
-const 상세페이지_로딩 = /* html */ `
+const 상세페이지_로딩 = /*html*/ `
     <div class="min-h-screen bg-gray-50">
       <header class="bg-white shadow-sm sticky top-0 z-40">
         <div class="max-w-md mx-auto px-4 py-4">
@@ -925,7 +925,7 @@ const 상세페이지_로딩 = /* html */ `
   `;
 
 // eslint-disable-next-line no-unused-vars
-const 상세페이지_로딩완료 = /* html */ `
+const 상세페이지_로딩완료 = /*html*/ `
     <div class="min-h-screen bg-gray-50">
       <header class="bg-white shadow-sm sticky top-0 z-40">
         <div class="max-w-md mx-auto px-4 py-4">
@@ -1087,7 +1087,7 @@ const 상세페이지_로딩완료 = /* html */ `
   `;
 
 // eslint-disable-next-line no-unused-vars
-const 장바구니_모달 = /* html */ `
+const 장바구니_모달 = /*html*/ `
   <div class="min-h-screen bg-gray-50">
     <header class="bg-white shadow-sm sticky top-0 z-40">
       <div class="max-w-md mx-auto px-4 py-4">
@@ -1382,7 +1382,7 @@ const 장바구니_모달 = /* html */ `
 `;
 
 // eslint-disable-next-line no-unused-vars
-const _404_ = /* html */ `
+const _404_ = /*html*/ `
     <main class="max-w-md mx-auto px-4 py-4">
       <div class="text-center my-4 py-20 shadow-md p-6 bg-white rounded-lg">
       <svg viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg">

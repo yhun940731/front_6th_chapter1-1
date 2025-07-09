@@ -1,4 +1,8 @@
-const LoadingUI = /* html */ `
+import CartDialog from "../layouts/Cart";
+
+import { getCartItemCount } from "../utils/cart.js";
+
+const LoadingUI = /*html*/ `
             <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden animate-pulse">
                 <div class="aspect-square bg-gray-200"></div>
                 <div class="p-3">
@@ -27,7 +31,7 @@ const ProductItem = ({
   // category2,
   // category3,
   // category4,
-}) => /* html */ `
+}) => /*html*/ `
              <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden product-card"
                    data-product-id="${productId}">
                 <!-- 상품 이미지 -->
@@ -57,15 +61,13 @@ const ProductItem = ({
               </div>
 `;
 
-const Category1Item = (category /* html */) =>
-  `
+const Category1Item = (category) => /*html*/ `
                 <button data-category1="${category}" class="category1-filter-btn text-left px-3 py-2 text-sm rounded-md border transition-colors
                    bg-white border-gray-300 text-gray-700 hover:bg-gray-50">
                   ${category}
                 </button>
 `;
-const Category2Item = (category /* html */) =>
-  `
+const Category2Item = (category) => /*html*/ `
                 <button data-category2="${category}" class="category2-filter-btn text-left px-3 py-2 text-sm rounded-md border transition-colors
                    bg-white border-gray-300 text-gray-700 hover:bg-gray-50">
                   ${category}
@@ -93,9 +95,9 @@ export const HomePage = ({
   const currentSort = sort || "price_asc";
   const currentSearch = search || "";
 
-  const cartCount = JSON.parse(sessionStorage.getItem("cart"))?.length || 0;
+  const cartCount = getCartItemCount();
 
-  return /* html */ `
+  return /*html*/ `
     <div class="min-h-screen bg-gray-50">
       <header class="bg-white shadow-sm sticky top-0 z-40">
         <div class="max-w-md mx-auto px-4 py-4">
@@ -112,7 +114,7 @@ export const HomePage = ({
                 </svg>
                 ${
                   cartCount > 0
-                    ? `
+                    ? /*html*/ `
                   <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
                    ${cartCount}
                  </span>
@@ -159,7 +161,7 @@ export const HomePage = ({
                     ? /*html*/ `
                 <span class="text-xs text-gray-500">&gt;</span>
                 <span class="text-xs text-gray-600 cursor-default">${category2}</span>
-`
+                `
                     : ""
                 }
               </div>
@@ -210,7 +212,7 @@ export const HomePage = ({
            ${
              loading
                ? ""
-               : `
+               : /*html*/ `
             <div class="mb-4 text-sm text-gray-600">
               총 <span class="font-medium text-gray-900">${total}개</span>의 상품
             </div>
@@ -227,7 +229,7 @@ export const HomePage = ({
             <!-- 더 보기 로딩 상태 -->
             ${
               loadingMore
-                ? /* html */ `
+                ? /*html*/ `
             <div class="text-center py-4">
               <div class="inline-flex items-center">
                 <svg class="animate-spin h-5 w-5 text-blue-600 mr-2" fill="none" viewBox="0 0 24 24">
@@ -250,6 +252,23 @@ export const HomePage = ({
           </div>
         </div>
       </main>
+      <!-- 장바구니 다이얼로그 -->
+           ${CartDialog()} 
+      <div class="flex flex-col gap-2 items-center justify-center mx-auto" style="width: fit-content;">
+     <div class="bg-green-600 text-white px-4 py-3 rounded-lg shadow-lg flex items-center space-x-2 max-w-sm">
+            <div class="flex-shrink-0">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+            </div>
+            <p class="text-sm font-medium">장바구니에 추가되었습니다</p>
+            <button id="toast-close-btn" class="flex-shrink-0 ml-2 text-white hover:text-gray-200">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+     </div>
       <footer class="bg-white shadow-sm sticky top-0 z-40">
         <div class="max-w-md mx-auto py-8 text-center text-gray-500">
           <p>© 2025 항해플러스 프론트엔드 쇼핑몰</p>

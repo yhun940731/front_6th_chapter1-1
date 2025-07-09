@@ -2,12 +2,12 @@ import mainStore from "../store/main.js";
 import { showSnackbar } from "../layouts/Snackbar.js";
 import { ADD_TO_CART_SNACKBAR, ERROR_SNACKBAR } from "../constants/enum.js";
 import { render } from "../core/renderer.js";
+import { addToCart, updateCartQuantity, removeFromCart } from "../utils/cart.js";
 
 export const handleAddToCart = (e) => {
   // 클릭된 요소가 장바구니 추가 버튼인지 확인
   if (!e.target.classList.contains("add-to-cart-btn")) return;
 
-  // store 없이 sessionStorage에 장바구니 정보 저장
   const productId = e.target.dataset.productId;
 
   if (productId === undefined) {
@@ -22,24 +22,65 @@ export const handleAddToCart = (e) => {
     return;
   }
 
-  const cart = JSON.parse(sessionStorage.getItem("cart")) || [];
+  // 장바구니에 상품 추가 (수량 자동 처리)
+  const updatedCart = addToCart(selectedProduct);
 
-  // 이미 장바구니에 있는 상품인지 확인
-  const existingProductIndex = cart.find((item) => item.id === selectedProduct?.productId);
+  console.log("장바구니 업데이트:", updatedCart);
 
-  console.log("장바구니에 추가된 상품:", cart);
-
-  if (existingProductIndex) {
-    // 장바구니 상품 수량 증가
-    return;
-  }
-
-  cart.push(selectedProduct);
-
-  // sessionStorage에 장바구니 정보 저장
-  sessionStorage.setItem("cart", JSON.stringify(cart));
   // 스낵바 표시
   showSnackbar(ADD_TO_CART_SNACKBAR);
 
   render();
+};
+
+// 장바구니 다이얼로그 내에서의 이벤트 핸들러들
+export const handleCartQuantityChange = (e) => {
+  if (!e.target.classList.contains("quantity-input")) return;
+
+  const productId = e.target.dataset.productId;
+  const newQuantity = parseInt(e.target.value);
+
+  if (productId && newQuantity > 0) {
+    updateCartQuantity(productId, newQuantity);
+    render();
+  }
+};
+
+export const handleQuantityIncrease = (e) => {
+  if (!e.target.classList.contains("quantity-increase-btn")) return;
+
+  const productId = e.target.dataset.productId;
+  const quantityInput = document.querySelector(`.quantity-input[data-product-id="${productId}"]`);
+
+  if (quantityInput) {
+    const currentQuantity = parseInt(quantityInput.value);
+    updateCartQuantity(productId, currentQuantity + 1);
+    render();
+  }
+};
+
+export const handleQuantityDecrease = (e) => {
+  if (!e.target.classList.contains("quantity-decrease-btn")) return;
+
+  const productId = e.target.dataset.productId;
+  const quantityInput = document.querySelector(`.quantity-input[data-product-id="${productId}"]`);
+
+  if (quantityInput) {
+    const currentQuantity = parseInt(quantityInput.value);
+    if (currentQuantity > 1) {
+      updateCartQuantity(productId, currentQuantity - 1);
+      render();
+    }
+  }
+};
+
+export const handleRemoveFromCart = (e) => {
+  if (!e.target.classList.contains("cart-item-remove-btn")) return;
+
+  const productId = e.target.dataset.productId;
+
+  if (productId) {
+    removeFromCart(productId);
+    render();
+  }
 };
