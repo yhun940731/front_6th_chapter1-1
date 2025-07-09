@@ -57,9 +57,16 @@ const ProductItem = ({
               </div>
 `;
 
-const CategoryItem = (category /* html */) =>
+const Category1Item = (category /* html */) =>
   `
                 <button data-category1="${category}" class="category1-filter-btn text-left px-3 py-2 text-sm rounded-md border transition-colors
+                   bg-white border-gray-300 text-gray-700 hover:bg-gray-50">
+                  ${category}
+                </button>
+`;
+const Category2Item = (category /* html */) =>
+  `
+                <button data-category2="${category}" class="category2-filter-btn text-left px-3 py-2 text-sm rounded-md border transition-colors
                    bg-white border-gray-300 text-gray-700 hover:bg-gray-50">
                   ${category}
                 </button>
@@ -72,12 +79,21 @@ export const HomePage = ({
   total = 0,
   categories,
   params = {},
+  pagination = {},
 }) => {
   const categoryList = Object.keys(categories);
 
-  const currentLimit = params.limit || 20;
-  const currentSort = params.sort || "price_asc";
-  const currentSearch = params.search || "";
+  const { hasNext } = pagination;
+  const { limit, sort, search, category1, category2 } = params;
+
+  const categories2Obj = categories[category1];
+  const category2List = categories2Obj ? Object.keys(categories2Obj) : [];
+
+  const currentLimit = limit || 20;
+  const currentSort = sort || "price_asc";
+  const currentSearch = search || "";
+
+  const cartCount = JSON.parse(sessionStorage.getItem("cart"))?.length || 0;
 
   return /* html */ `
     <div class="min-h-screen bg-gray-50">
@@ -94,6 +110,15 @@ export const HomePage = ({
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M3 3h2l.4 2M7 13h10l4-8H5.4m2.6 8L6 2H3m4 11v6a1 1 0 001 1h1a1 1 0 001-1v-6M13 13v6a1 1 0 001 1h1a1 1 0 001-1v-6"></path>
                 </svg>
+                ${
+                  cartCount > 0
+                    ? `
+                  <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                   ${cartCount}
+                 </span>
+                `
+                    : ""
+                }
               </button>
             </div>
           </div>
@@ -119,15 +144,29 @@ export const HomePage = ({
           <div class="space-y-3">
             <!-- 카테고리 필터 -->
             <div class="space-y-2">
-              <div class="flex items-center gap-2">
+              <div id="breadcrumb-list" class="flex items-center gap-2">
                 <label class="text-sm text-gray-600">카테고리:</label>
                 <button data-breadcrumb="reset" class="text-xs hover:text-blue-800 hover:underline">전체</button>
+                ${
+                  category1
+                    ? /*html*/ `
+                <span class="text-xs text-gray-500">&gt;</span>
+                <button data-breadcrumb="category1" data-category1="${category1}" class="text-xs hover:text-blue-800 hover:underline">${category1}</button>`
+                    : ""
+                }
+                ${
+                  category2
+                    ? /*html*/ `
+                <span class="text-xs text-gray-500">&gt;</span>
+                <span class="text-xs text-gray-600 cursor-default">${category2}</span>
+`
+                    : ""
+                }
               </div>
               <!-- 1depth 카테고리 -->
-              <div class="flex flex-wrap gap-2">
-              ${loading ? `<div class="text-sm text-gray-500 italic">카테고리 로딩 중...</div>` : categoryList.map(CategoryItem).join("")}
+              <div id="category-list" class="flex flex-wrap gap-2">
+              ${loading ? `<div class="text-sm text-gray-500 italic">카테고리 로딩 중...</div>` : category2List?.length ? category2List.map(Category2Item).join("") : categoryList.map(Category1Item).join("")}
               </div>
-              <!-- 2depth 카테고리 -->
             </div>
             <!-- 기존 필터들 -->
             <div class="flex gap-2 items-center justify-between">
@@ -200,10 +239,14 @@ export const HomePage = ({
               </div>
             </div>
             `
-                : ""
+                : hasNext
+                  ? ""
+                  : `
+                <div class="text-center py-4 text-sm text-gray-500">
+              모든 상품을 확인했습니다
+            </div>
+            `
             }
-            
-          
           </div>
         </div>
       </main>

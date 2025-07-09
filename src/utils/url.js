@@ -1,3 +1,5 @@
+import mainStore from "../store/main.js";
+
 // URL 쿼리스트링 파싱 함수
 const getURLParams = () => {
   const params = new URLSearchParams(window.location.search);
@@ -7,6 +9,7 @@ const getURLParams = () => {
     sort: params.get("sort") || "price_asc",
     search: decodeURIComponent(params.get("search") || ""),
     category1: params.get("category1") || "",
+    category2: params.get("category2") || "",
   };
 };
 
@@ -34,4 +37,14 @@ const mergeURLParams = (newParams) => {
   return urlParams;
 };
 
-export { getURLParams, mergeURLParams };
+// URL 업데이트 함수 (새로고침 없이)
+const updateURL = (newParams) => {
+  const params = mergeURLParams(newParams);
+
+  const newURL = `${window.location.pathname}${params.toString() ? "?" + params.toString() : ""}`;
+  window.history.pushState({}, "", newURL);
+
+  mainStore.setParams(Object.fromEntries(params.entries()));
+};
+
+export { getURLParams, mergeURLParams, updateURL };

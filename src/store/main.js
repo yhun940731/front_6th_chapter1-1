@@ -13,7 +13,13 @@ const initialState = {
   loading: false,
   loadingMore: false,
   categories: {},
-  params: {},
+  params: {
+    // limit: 20, // 페이지당 상품 수
+    // sort: "price_asc", // 정렬 기준
+    // search: "", // 검색어
+    // category1: "", // 1차 카테고리 필터
+    // category2: "", // 2차 카테고리 필터
+  },
   pagination: {
     page: 1,
     limit: 20,
@@ -149,31 +155,6 @@ class Store {
 }
 
 // Store 인스턴스 생성 및 내보내기
-export const store = new Store(initialState);
+const store = new Store(initialState);
 
-// 편의를 위한 개별 함수들 내보내기
-export const getState = () => store.getState();
-export const getProducts = () => store.getProducts();
-export const getTotal = () => store.getTotal();
-export const getLoading = () => store.getLoading();
-export const getLoadingMore = () => store.getLoadingMore();
-export const getCategories = () => store.getCategories();
-export const getParams = () => store.getParams();
-export const getPagination = () => store.getPagination();
-
-export const setProducts = (products) => store.setProducts(products);
-export const appendProducts = (products) => store.appendProducts(products);
-export const setTotal = (total) => store.setTotal(total);
-export const setLoading = (loading) => store.setLoading(loading);
-export const setLoadingMore = (loadingMore) => store.setLoadingMore(loadingMore);
-export const setCategories = (categories) => store.setCategories(categories);
-export const setParams = (params) => store.setParams(params);
-export const setPagination = (pagination) => store.setPagination(pagination);
-
-export const updateProductsData = (data) => store.updateProductsData(data);
-export const resetPagination = () => store.resetPagination();
-export const incrementPage = () => store.incrementPage();
-export const resetStore = () => store.reset();
-
-// 상태 구독
-export const subscribe = (listener) => store.subscribe(listener);
+export default store;
