@@ -1,6 +1,7 @@
 import { getProduct, getProducts } from "../api/productApi.js";
 import mainStore from "../store/main.js";
 import { render } from "../core/renderer.js";
+import { getFullPath } from "../utils/path.js";
 
 export const loadProductDetail = async (productId) => {
   try {
@@ -40,8 +41,9 @@ export const goBackToHome = () => {
   mainStore.setCurrentProduct(null);
   mainStore.setRelatedProducts([]);
 
-  // URL을 홈으로 변경
-  window.history.pushState({}, "", "/");
+  // URL을 홈으로 변경 (BASE_PATH 고려)
+  const homePath = getFullPath("/");
+  window.history.pushState({}, "", homePath);
 
   render();
 };

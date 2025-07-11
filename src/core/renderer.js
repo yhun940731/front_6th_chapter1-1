@@ -3,6 +3,7 @@ import { ProductDetailPage } from "../pages/ProductDetailPage.js";
 import { NotFoundPage } from "../pages/NotFoundPage.js";
 import mainStore from "../store/main.js";
 import { getURLParams } from "../utils/url.js";
+import { getAppPath } from "../utils/path.js";
 import { syncFormWithURL } from "./formSync.js";
 import {
   addCartDialogEventListeners,
@@ -15,6 +16,7 @@ import {
 import { setupInfiniteScroll } from "./infiniteScroll.js";
 import { goBackToHome } from "../services/productDetailService.js";
 import { setupProductDetailEventListeners } from "../handlers/productDetailHandlers.js";
+import { setupNotFoundEventListeners } from "../handlers/notFoundHandlers.js";
 
 export const render = () => {
   // 기존 이벤트 리스너 제거
@@ -23,7 +25,7 @@ export const render = () => {
   removeCartDialogEventListeners();
 
   const mainState = mainStore.getState();
-  const currentPath = window.location.pathname;
+  const currentPath = getAppPath(); // BASE_PATH를 고려한 앱 경로 사용
 
   let pageHTML = "";
 
@@ -59,6 +61,7 @@ export const render = () => {
     setupInfiniteScroll();
   } else {
     // 404 페이지 이벤트 설정
+    setupNotFoundEventListeners();
   }
 
   // 공통 이벤트 리스너 추가

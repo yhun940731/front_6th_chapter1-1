@@ -1,4 +1,5 @@
 import mainStore from "../store/main.js";
+import { getAppPath, getFullPath } from "./path.js";
 
 // URL 쿼리스트링 파싱 함수
 const getURLParams = () => {
@@ -40,8 +41,9 @@ const mergeURLParams = (newParams) => {
 // URL 업데이트 함수 (새로고침 없이)
 const updateURL = (newParams) => {
   const params = mergeURLParams(newParams);
+  const currentAppPath = getAppPath();
 
-  const newURL = `${window.location.pathname}${params.toString() ? "?" + params.toString() : ""}`;
+  const newURL = `${getFullPath(currentAppPath)}${params.toString() ? "?" + params.toString() : ""}`;
   window.history.pushState({}, "", newURL);
 
   mainStore.setParams(Object.fromEntries(params.entries()));

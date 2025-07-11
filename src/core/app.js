@@ -1,21 +1,15 @@
 import mainStore from "../store/main.js";
 import { getCategories, getProducts } from "../api/productApi.js";
 import { getURLParams } from "../utils/url.js";
+import { getAppPath } from "../utils/path.js";
 import { updateProducts } from "../services/productService.js";
 import { loadProductDetail } from "../services/productDetailService.js";
 import { render } from "../core/renderer.js";
 
-const enableMocking = () =>
-  import("../mocks/browser.js").then(({ worker }) =>
-    worker.start({
-      onUnhandledRequest: "bypass",
-    }),
-  );
-
 // 브라우저 뒤로가기/앞으로가기 지원
 const setupPopstateHandler = () => {
   window.addEventListener("popstate", async () => {
-    const currentPath = window.location.pathname;
+    const currentPath = getAppPath();
 
     if (currentPath.startsWith("/product/")) {
       // 상품 상세 페이지
@@ -35,7 +29,7 @@ const setupPopstateHandler = () => {
 
 // 초기 라우팅 처리
 const handleInitialRoute = async () => {
-  const currentPath = window.location.pathname;
+  const currentPath = getAppPath();
 
   if (currentPath.startsWith("/product/")) {
     // 상품 상세 페이지로 직접 접근
@@ -95,13 +89,4 @@ export const initializeApp = async () => {
 
   // 초기 라우팅 처리
   await handleInitialRoute();
-};
-
-// 애플리케이션 시작
-export const startApp = () => {
-  if (import.meta.env.MODE !== "test") {
-    enableMocking().then(initializeApp);
-  } else {
-    initializeApp();
-  }
 };

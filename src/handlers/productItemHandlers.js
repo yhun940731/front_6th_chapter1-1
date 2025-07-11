@@ -4,6 +4,7 @@ import { ADD_TO_CART_SNACKBAR, ERROR_SNACKBAR } from "../constants/enum.js";
 import { render } from "../core/renderer.js";
 import { addToCart } from "../utils/cart.js";
 import { loadProductDetail } from "../services/productDetailService.js";
+import { getFullPath } from "../utils/path.js";
 
 export const handleAddToCart = (e) => {
   // 클릭된 요소가 장바구니 추가 버튼인지 확인
@@ -48,8 +49,9 @@ export const handleProductDetailClick = (e) => {
   const productId = productCard.dataset.productId;
 
   if (productId) {
-    // URL을 상품 상세 페이지로 변경
-    window.history.pushState({}, "", `/product/${productId}`);
+    // URL을 상품 상세 페이지로 변경 (BASE_PATH 고려)
+    const productPath = getFullPath(`/product/${productId}`);
+    window.history.pushState({}, "", productPath);
 
     // 상품 상세 정보 로드
     loadProductDetail(productId);
