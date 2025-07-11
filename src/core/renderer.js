@@ -1,5 +1,6 @@
 import { HomePage } from "../pages/HomePage.js";
 import { ProductDetailPage } from "../pages/ProductDetailPage.js";
+import { NotFoundPage } from "../pages/NotFoundPage.js";
 import mainStore from "../store/main.js";
 import { getURLParams } from "../utils/url.js";
 import { syncFormWithURL } from "./formSync.js";
@@ -32,13 +33,17 @@ export const render = () => {
     pageHTML = ProductDetailPage({
       product: mainState.currentProduct,
       relatedProducts: mainState.relatedProducts,
+      loading: mainState.loading,
     });
-  } else {
+  } else if (currentPath === "/" || currentPath === "") {
     // 홈 페이지
     pageHTML = HomePage({
       ...mainState,
       params: mainState.params || getURLParams(),
     });
+  } else {
+    // 404 페이지
+    pageHTML = NotFoundPage();
   }
 
   document.body.querySelector("#root").innerHTML = pageHTML;
@@ -48,10 +53,12 @@ export const render = () => {
     // 상품 상세 페이지 이벤트 설정
     setupProductDetailEvents();
     setupProductDetailEventListeners();
-  } else {
+  } else if (currentPath === "/" || currentPath === "") {
     // 홈 페이지 이벤트 설정
     syncFormWithURL();
     setupInfiniteScroll();
+  } else {
+    // 404 페이지 이벤트 설정
   }
 
   // 공통 이벤트 리스너 추가

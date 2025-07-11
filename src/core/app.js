@@ -21,11 +21,14 @@ const setupPopstateHandler = () => {
       // 상품 상세 페이지
       const productId = currentPath.split("/")[2];
       await loadProductDetail(productId);
-    } else {
+    } else if (currentPath === "/") {
       // 홈 페이지
       const urlParams = getURLParams();
       mainStore.setParams(urlParams);
       await updateProducts(urlParams);
+    } else {
+      // 404 페이지
+      render();
     }
   });
 };
@@ -38,9 +41,12 @@ const handleInitialRoute = async () => {
     // 상품 상세 페이지로 직접 접근
     const productId = currentPath.split("/")[2];
     await loadProductDetail(productId);
-  } else {
+  } else if (currentPath === "/") {
     // 홈 페이지 초기화
     await initializeHomePage();
+  } else {
+    // 404 페이지 처리
+    render();
   }
 };
 
