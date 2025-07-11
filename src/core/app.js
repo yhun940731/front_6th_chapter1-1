@@ -2,6 +2,7 @@ import mainStore from "../store/main.js";
 import { getCategories, getProducts } from "../api/productApi.js";
 import { getURLParams } from "../utils/url.js";
 import { updateProducts } from "../services/productService.js";
+import { loadProductDetail } from "../services/productDetailService.js";
 import { render } from "../core/renderer.js";
 
 const enableMocking = () =>
@@ -14,13 +15,37 @@ const enableMocking = () =>
 // 브라우저 뒤로가기/앞으로가기 지원
 const setupPopstateHandler = () => {
   window.addEventListener("popstate", async () => {
-    const urlParams = getURLParams();
-    mainStore.setParams(urlParams);
-    await updateProducts(urlParams);
+    const currentPath = window.location.pathname;
+
+    if (currentPath.startsWith("/product/")) {
+      // 상품 상세 페이지
+      const productId = currentPath.split("/")[2];
+      await loadProductDetail(productId);
+    } else {
+      // 홈 페이지
+      const urlParams = getURLParams();
+      mainStore.setParams(urlParams);
+      await updateProducts(urlParams);
+    }
   });
 };
 
-export const initializeApp = async () => {
+// 초기 라우팅 처리
+const handleInitialRoute = async () => {
+  const currentPath = window.location.pathname;
+
+  if (currentPath.startsWith("/product/")) {
+    // 상품 상세 페이지로 직접 접근
+    const productId = currentPath.split("/")[2];
+    await loadProductDetail(productId);
+  } else {
+    // 홈 페이지 초기화
+    await initializeHomePage();
+  }
+};
+
+// 홈 페이지 초기화
+const initializeHomePage = async () => {
   // URL 파라미터 읽기
   const urlParams = getURLParams();
   mainStore.setParams(urlParams);
@@ -56,9 +81,14 @@ export const initializeApp = async () => {
   mainStore.setLoading(false);
 
   render();
+};
 
+export const initializeApp = async () => {
   // popstate 이벤트 설정
   setupPopstateHandler();
+
+  // 초기 라우팅 처리
+  await handleInitialRoute();
 };
 
 // 애플리케이션 시작

@@ -1,6 +1,6 @@
 import { updateURL } from "../utils/url.js";
 import { updateCategory } from "../services/productService.js";
-import { showSnackbar } from "../layouts/Snackbar.js";
+import { showSnackbar } from "../widgets/Snackbar.js";
 import { ERROR_SNACKBAR } from "../constants/enum.js";
 import { setSelectedCategoryStyle } from "../utils/style.js";
 

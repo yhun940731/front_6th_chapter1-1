@@ -25,6 +25,10 @@ const initialState = {
     limit: 20,
     hasNext: true,
   },
+  openCart: false, // 장바구니 다이얼로그 열림 상태
+  currentProduct: null, // 현재 보고 있는 상품 상세
+  relatedProducts: [], // 관련 상품 목록
+  selectedQuantity: 1, // 상품 상세에서 선택한 수량
 };
 
 // Store 클래스 정의
@@ -81,6 +85,23 @@ class Store {
     return this.state.pagination;
   }
 
+  getCurrentProduct() {
+    return this.state.currentProduct;
+  }
+
+  getRelatedProducts() {
+    return this.state.relatedProducts;
+  }
+
+  getSelectedQuantity() {
+    return this.state.selectedQuantity;
+  }
+
+  openCart() {
+    this.state.openCart = true;
+    this.notify();
+  }
+
   // 개별 상태 setter들
   setProducts(products) {
     this.state.products = products;
@@ -119,6 +140,26 @@ class Store {
 
   setPagination(pagination) {
     this.state.pagination = { ...this.state.pagination, ...pagination };
+    this.notify();
+  }
+
+  setCurrentProduct(product) {
+    this.state.currentProduct = product;
+    this.notify();
+  }
+
+  setRelatedProducts(products) {
+    this.state.relatedProducts = products;
+    this.notify();
+  }
+
+  setSelectedQuantity(quantity) {
+    this.state.selectedQuantity = quantity;
+    this.notify();
+  }
+
+  closeCart() {
+    this.state.openCart = false;
     this.notify();
   }
 

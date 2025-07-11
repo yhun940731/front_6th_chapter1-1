@@ -1,4 +1,5 @@
-import CartDialog from "../layouts/Cart";
+import ProductItem from "../widgets/ProductItem.js";
+import CartDialog from "../widgets/Cart.js";
 
 import { getCartItemCount } from "../utils/cart.js";
 
@@ -15,51 +16,6 @@ const LoadingUI = /*html*/ `
 `;
 
 const LoadingUIList = LoadingUI.repeat(6);
-
-const ProductItem = ({
-  title,
-  // link,
-  image,
-  lprice,
-  // hprice,
-  // mallName,
-  productId,
-  // productType,
-  // brand,
-  // maker,
-  // category1,
-  // category2,
-  // category3,
-  // category4,
-}) => /*html*/ `
-             <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden product-card"
-                   data-product-id="${productId}">
-                <!-- 상품 이미지 -->
-                <div class="aspect-square bg-gray-100 overflow-hidden cursor-pointer product-image">
-                  <img src="${image}"
-                       alt="${title}"
-                       class="w-full h-full object-cover hover:scale-105 transition-transform duration-200"
-                       loading="lazy">
-                </div>
-                <!-- 상품 정보 -->
-                <div class="p-3">
-                  <div class="cursor-pointer product-info mb-3">
-                    <h3 class="text-sm font-medium text-gray-900 line-clamp-2 mb-1">
-                      ${title}
-                    </h3>
-                    <p class="text-xs text-gray-500 mb-2"></p>
-                    <p class="text-lg font-bold text-gray-900">
-                      ${lprice}원
-                    </p>
-                  </div>
-                  <!-- 장바구니 버튼 -->
-                  <button class="w-full bg-blue-600 text-white text-sm py-2 px-3 rounded-md
-                         hover:bg-blue-700 transition-colors add-to-cart-btn" data-product-id="${productId}">
-                    장바구니 담기
-                  </button>
-                </div>
-              </div>
-`;
 
 const Category1Item = (category) => /*html*/ `
                 <button data-category1="${category}" class="category1-filter-btn text-left px-3 py-2 text-sm rounded-md border transition-colors
@@ -82,6 +38,7 @@ export const HomePage = ({
   categories,
   params = {},
   pagination = {},
+  openCart = false,
 }) => {
   const categoryList = Object.keys(categories);
 
@@ -253,7 +210,7 @@ export const HomePage = ({
         </div>
       </main>
       <!-- 장바구니 다이얼로그 -->
-           ${CartDialog()} 
+           ${openCart ? CartDialog() : ""} 
       <div class="flex flex-col gap-2 items-center justify-center mx-auto" style="width: fit-content;">
      <div class="bg-green-600 text-white px-4 py-3 rounded-lg shadow-lg flex items-center space-x-2 max-w-sm">
             <div class="flex-shrink-0">

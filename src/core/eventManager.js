@@ -1,15 +1,16 @@
 import { handleChangeLimitSelect, handleChangeCategory1Select } from "../handlers/filterHandlers.js";
+import { handleCategoryFilterClick, handleBreadcrumbClick } from "../handlers/categoryHandlers.js";
 import { handleSearchKeyDown } from "../handlers/searchHandlers.js";
+import { handleAddToCart, handleProductDetailClick } from "../handlers/productItemHandlers.js";
 import {
-  handleAddToCart,
   handleCartQuantityChange,
   handleQuantityIncrease,
   handleQuantityDecrease,
   handleRemoveFromCart,
+  handleOpenCartDialog,
 } from "../handlers/cartHandlers.js";
-import { handleCategoryFilterClick, handleBreadcrumbClick } from "../handlers/categoryHandlers.js";
 
-export const setupEventListeners = () => {
+export const addMainEventListeners = () => {
   // 개수 선택 이벤트
   const limitSelect = document.getElementById("limit-select");
   if (limitSelect) limitSelect.addEventListener("change", handleChangeLimitSelect);
@@ -22,9 +23,6 @@ export const setupEventListeners = () => {
   const searchInput = document.getElementById("search-input");
   if (searchInput) searchInput.addEventListener("keydown", handleSearchKeyDown);
 
-  const productsGrid = document.getElementById("products-grid");
-  if (productsGrid) productsGrid.addEventListener("click", handleAddToCart);
-
   // 카테고리 필터링 버튼 이벤트 위임
   const categoryList = document.getElementById("category-list");
   if (categoryList) {
@@ -36,20 +34,9 @@ export const setupEventListeners = () => {
   if (breadcrumbList) {
     breadcrumbList.addEventListener("click", handleBreadcrumbClick);
   }
-
-  // 장바구니 다이얼로그 이벤트들
-  const cartDialog = document.getElementById("cart-dialog");
-  if (cartDialog) {
-    cartDialog.addEventListener("change", handleCartQuantityChange);
-    cartDialog.addEventListener("click", (e) => {
-      handleQuantityIncrease(e);
-      handleQuantityDecrease(e);
-      handleRemoveFromCart(e);
-    });
-  }
 };
 
-export const removeEventListeners = () => {
+export const removeMainEventListeners = () => {
   // 개수 선택 이벤트 제거
   const limitSelect = document.getElementById("limit-select");
   if (limitSelect) limitSelect.removeEventListener("change", handleChangeLimitSelect);
@@ -62,9 +49,6 @@ export const removeEventListeners = () => {
   const searchInput = document.getElementById("search-input");
   if (searchInput) searchInput.removeEventListener("keydown", handleSearchKeyDown);
 
-  const productsGrid = document.getElementById("products-grid");
-  if (productsGrid) productsGrid.removeEventListener("click", handleAddToCart);
-
   // 카테고리 필터링 버튼 이벤트 제거
   const categoryList = document.getElementById("category-list");
   if (categoryList) categoryList.removeEventListener("click", handleCategoryFilterClick);
@@ -74,11 +58,50 @@ export const removeEventListeners = () => {
   if (breadcrumbList) {
     breadcrumbList.removeEventListener("click", handleBreadcrumbClick);
   }
+};
 
-  // 장바구니 다이얼로그 이벤트 제거
+export const addProductItemEventListeners = () => {
+  const productsGrid = document.getElementById("products-grid");
+  if (!productsGrid) return;
+
+  // 상품 상세 페이지 진입 클릭 이벤트
+  productsGrid.addEventListener("click", handleProductDetailClick);
+  productsGrid.addEventListener("click", handleAddToCart);
+};
+
+export const removeProductItemEventListeners = () => {
+  const productsGrid = document.getElementById("products-grid");
+  if (!productsGrid) return;
+
+  // 상품 상세 페이지 진입 클릭 이벤트
+  productsGrid.removeEventListener("click", handleProductDetailClick);
+  productsGrid.removeEventListener("click", handleAddToCart);
+};
+
+const handleCartDialogEvents = (e) => {
+  handleQuantityIncrease(e);
+  handleQuantityDecrease(e);
+  handleRemoveFromCart(e);
+};
+
+export const addCartDialogEventListeners = () => {
+  // 장바구니 다이얼로그 이벤트들
+  const cartDialog = document.getElementById("cart-dialog");
+  if (cartDialog) {
+    cartDialog.addEventListener("change", handleCartQuantityChange);
+    cartDialog.addEventListener("click", handleCartDialogEvents);
+  }
+};
+
+export const removeCartDialogEventListeners = () => {
+  // cart-icon-btn 이벤트 제거
+  const addToCartButtons = document.getElementById("cart-icon-btn");
+  if (addToCartButtons) addToCartButtons.removeEventListener("click", handleOpenCartDialog);
+
+  // 장바구니 다이얼로그 이벤트들 제거
   const cartDialog = document.getElementById("cart-dialog");
   if (cartDialog) {
     cartDialog.removeEventListener("change", handleCartQuantityChange);
-    // click 이벤트는 익명 함수로 등록했으므로 제거할 수 없음 (DOM이 재생성되므로 문제없음)
+    cartDialog.removeEventListener("click", handleCartDialogEvents);
   }
 };

@@ -89,7 +89,8 @@ export const clearCart = () => {
  */
 export const getCartItemCount = () => {
   const cart = getCart();
-  return cart.reduce((total, item) => total + (item.quantity || 1), 0);
+
+  return cart.length;
 };
 
 /**

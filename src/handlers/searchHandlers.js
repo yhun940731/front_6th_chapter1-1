@@ -6,7 +6,8 @@ export const handleSearchSubmit = async () => {
 
   if (searchInput) {
     const search = searchInput.value.trim();
-    updateURL({ search: encodeURIComponent(search) });
+    console.log("Search submitted:", search);
+    updateURL({ search }); // encodeURIComponent 제거 - updateURL에서 자동으로 인코딩됨
     await updateProducts({ search });
   }
 };

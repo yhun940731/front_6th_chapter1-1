@@ -64,7 +64,7 @@ const removeSnackbarEventListener = () => {
  * @param {string} type - 'addToCart', 'removeFromCart', 'error' 중 하나의 타입을 받습니다.
  */
 const showSnackbar = (type) => {
-  document.body.querySelector("#snackbar").innerHTML = `
+  document.getElementById("snackbar").innerHTML = `
      <div class="flex flex-col gap-2 items-center justify-center mx-auto" style="width: fit-content;">
      ${type === "addToCart" ? addToCartSnackbar : type === "removeFromCart" ? removeFromCartSnackbar : errorSnackbar}
      </div>
@@ -75,7 +75,7 @@ const showSnackbar = (type) => {
 
 const hideSnackbar = () => {
   removeSnackbarEventListener();
-  document.body.querySelector("#snackbar").innerHTML = "";
+  document.getElementById("snackbar").innerHTML = "";
 };
 
 export { showSnackbar, hideSnackbar };
